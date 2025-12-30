@@ -1,0 +1,11 @@
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+# https://github.com/bazelbuild/rules_python/blob/main/examples/pip_parse/BUILD.bazel#L55C3-L55C67
+# This rule adds a convenient way to update the requirements file.
+compile_pip_requirements(
+    name = "requirements",
+    src = "requirements.in",
+    requirements_linux = "requirements_linux.txt",
+    requirements_darwin = "requirements_darwin.txt",
+    requirements_windows = "requirements_windows.txt",
+)

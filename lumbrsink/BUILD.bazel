@@ -1,0 +1,29 @@
+
+cc_library(
+    name = "lumbrsink",
+    hdrs = ["sink.h"],
+    deps = [
+        "@com_google_absl//absl/log",
+        "@cpp-httplib//:cpp-httplib",
+    ],
+)
+
+cc_library(
+    name = "testable_logserver_lib",
+    hdrs = ["testable_logserver.h"],
+    deps = [
+        "@cpp-httplib//:cpp-httplib",
+        "@nlohmann_json//:json",
+    ],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["test.cc"],
+    deps = [
+        "@com_google_absl//absl/log:initialize",
+        "@gtest",
+        ":lumbrsink",
+        ":testable_logserver_lib",
+    ],
+)

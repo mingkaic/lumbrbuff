@@ -1,0 +1,13 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
+    name = "app",
+    srcs = ["app.py"],
+    data = ["templates/index.html"],
+    deps = [
+        "@pip//flask",
+        "@pip//flask_sqlalchemy",
+        "@pip//flask_socketio",
+    ],
+    visibility = ["//visibility:public"],
+)
