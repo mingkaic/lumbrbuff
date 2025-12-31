@@ -18,13 +18,25 @@
     </table>
 
     <script>
-        const socket = io();
-        socket.on('new_log', (data) => {
-            const table = document.getElementById('log-table');
+        const table = document.getElementById('log-table');
+
+        function addLogRow(data, prepend = false) {
             const row = table.insertRow(1);
             row.className = data.severity;
             row.innerHTML = `<td>${data.timestamp}</td><td>${data.severity}</td>
                              <td>${data.file}:${data.line}</td><td>${data.message}</td>`;
+        }
+
+        const socket = io();
+        socket.on('log_history', (logs) => {
+            console.log("Loading historical logs:", logs.length);
+
+            logs.forEach(log => {
+                addLogRow(log);
+            });
+        });
+        socket.on('new_log', (data) => {
+            addLogRow(data);
         });
     </script>
 </body>

@@ -11,3 +11,12 @@ py_binary(
     ],
     visibility = ["//visibility:public"],
 )
+
+cc_binary(
+    name = "mock_client",
+    srcs = ["mock_client.cc"],
+    deps = [
+        "@com_google_absl//absl/log:initialize",
+        "//lumbrsink",
+    ],
+)

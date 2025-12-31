@@ -23,7 +23,7 @@ class LogEntry(db.Model):
 
 @app.route('/logs', methods=['POST'])
 def receive_log():
-    data = request.json
+    data = request.get_json()
     new_log = LogEntry(**data)
     db.session.add(new_log)
     db.session.commit()
@@ -35,6 +35,24 @@ def receive_log():
 @app.route('/')
 def dashboard():
     return render_template('index.html')
+
+@socketio.on('connect')
+def handle_connect():
+    print("Client connected, sending historical logs...")
+    # Query all logs from the database
+    history = LogEntry.query.order_by(LogEntry.id.desc()).all()
+
+    # Convert DB objects to a list of dictionaries
+    history_data = [{
+        "severity": log.severity,
+        "timestamp": log.timestamp,
+        "file": log.file,
+        "line": log.line,
+        "message": log.message
+    } for log in history]
+
+    # Emit only to the sender (the newly connected browser)
+    socketio.emit('log_history', history_data)
 
 if __name__ == '__main__':
     with app.app_context(): db.create_all()
