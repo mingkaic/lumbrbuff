@@ -2,6 +2,7 @@
 cc_library(
     name = "lumbrsink",
     hdrs = ["sink.h"],
+    visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/log",
         "@cpp-httplib//:cpp-httplib",
@@ -11,6 +12,7 @@ cc_library(
 cc_library(
     name = "testable_logserver_lib",
     hdrs = ["testable_logserver.h"],
+    testonly = True,
     deps = [
         "@cpp-httplib//:cpp-httplib",
         "@nlohmann_json//:json",
