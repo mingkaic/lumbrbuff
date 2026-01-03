@@ -6,7 +6,7 @@ gunicorn_binary(
     srcs = ["appserver.py"],
     main = "appserver.py",
     data = ["templates/index.html"],
-    args = ["lumbrpile.appserver:app"],
+    args = ["--worker-class", "gevent", "-w", "1", "lumbrpile.appserver:app"],
     deps = [
         "@pip//flask",
         "@pip//flask_sqlalchemy",
@@ -21,6 +21,7 @@ cc_binary(
     srcs = ["mock_client.cc"],
     deps = [
         "@com_google_absl//absl/log:initialize",
+        "@com_google_absl//absl/flags:parse",
         "//lumbrsink",
     ],
 )

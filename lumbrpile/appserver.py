@@ -62,5 +62,5 @@ def handle_connect():
 with app.app_context():
     db.create_all()
 
-# if __name__ == '__main__':
-    # socketio.run(app, port=5000)
+if __name__ == '__main__':
+    socketio.run(app, port=5000)
