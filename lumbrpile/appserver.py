@@ -59,7 +59,8 @@ def handle_connect():
     # Emit only to the sender (the newly connected browser)
     socketio.emit('log_history', history_data)
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    socketio.run(app, port=5000)
+with app.app_context():
+    db.create_all()
+
+# if __name__ == '__main__':
+    # socketio.run(app, port=5000)

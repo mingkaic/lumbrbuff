@@ -1,14 +1,16 @@
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//build_defs:gunicorn.bzl", "gunicorn_binary")
 
-py_binary(
-    name = "app",
-    srcs = ["app.py"],
+gunicorn_binary(
+    name = "appserver",
+    srcs = ["appserver.py"],
+    main = "appserver.py",
     data = ["templates/index.html"],
+    args = ["lumbrpile.appserver:app"],
     deps = [
         "@pip//flask",
         "@pip//flask_sqlalchemy",
         "@pip//flask_socketio",
-        "@pip//gunicorn",
         "@pip//gevent",
     ],
     visibility = ["//visibility:public"],
