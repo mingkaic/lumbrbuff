@@ -1,4 +1,5 @@
 flask
 flask-sqlalchemy
 flask-socketio
-eventlet # Recommended for SocketIO performance
+gevent # Recommended for SocketIO performance
+gunicorn # For productionalization

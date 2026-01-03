@@ -8,6 +8,8 @@ py_binary(
         "@pip//flask",
         "@pip//flask_sqlalchemy",
         "@pip//flask_socketio",
+        "@pip//gunicorn",
+        "@pip//gevent",
     ],
     visibility = ["//visibility:public"],
 )
