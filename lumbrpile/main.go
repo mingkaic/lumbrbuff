@@ -110,9 +110,9 @@ func handleGetLogs(ctx *gin.Context) {
 	query := fmt.Sprintf(`SELECT id, severity, timestamp, file, line, message FROM %s WHERE 1=1`, *dbTable)
 	args := []interface{}{}
 	argCount := 1
-	if after, found := ctx.GetQuery("after"); found && after != "" {
+	if before, found := ctx.GetQuery("before"); found && before != "" {
 		query += fmt.Sprintf(" AND timestamp < $%d", argCount)
-		args = append(args, after)
+		args = append(args, before)
 		argCount++
 	}
 	if severity, found := ctx.GetQuery("severity"); found && severity != "" {
@@ -167,12 +167,12 @@ func handlePostLogs(ctx *gin.Context) {
 }
 
 func handleDeleteLogs(ctx *gin.Context) {
-	id, found := ctx.GetQuery("id")
-	if !found {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id not specified"})
+	before, found := ctx.GetQuery("before")
+	if !found || before == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "before timestamp not specified"})
 		return
 	}
-	_, err := db.Exec("DELETE FROM log_entries WHERE id = $1", id)
+	_, err := db.Exec("DELETE FROM log_entries WHERE timestamp < $1", before)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
