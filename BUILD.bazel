@@ -1,11 +1,25 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+# gazelle:prefix github.com/mingkaic/lumbrbuff
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
 
 # https://github.com/bazelbuild/rules_python/blob/main/examples/pip_parse/BUILD.bazel#L55C3-L55C67
 # This rule adds a convenient way to update the requirements file.
 compile_pip_requirements(
     name = "requirements",
     src = "requirements.in",
-    requirements_linux = "requirements_linux.txt",
     requirements_darwin = "requirements_darwin.txt",
+    requirements_linux = "requirements_linux.txt",
     requirements_windows = "requirements_windows.txt",
 )

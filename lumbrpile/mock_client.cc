@@ -7,7 +7,7 @@
 
 #include "lumbrsink/sink.h"
 
-ABSL_FLAG(std::string, server_addr, "http://localhost:5000", "Target test server address");
+ABSL_FLAG(std::string, server_addr, "http://localhost:8080", "Target test server address");
 
 int main(int argc, char** argv)
 {

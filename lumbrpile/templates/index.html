@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Real-Time Abseil Logs</title>
+    <title>Lumbrstreams</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
         body { font-family: monospace; background: #1e1e1e; color: #d4d4d4; }
@@ -9,35 +9,111 @@
         .INFO { color: #4caf50; }
         table { width: 100%; border-collapse: collapse; }
         td, th { padding: 8px; border-bottom: 1px solid #333; text-align: left; }
+        .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+          background: #2d2d2d; padding: 10px; border-radius: 4px; }
+        .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        input, select, button { background: #3c3c3c; color: #d4d4d4; border: 1px solid #555;
+          padding: 6px 10px; border-radius: 3px; }
+        button:hover { background: #4a4a4a; cursor: pointer; }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
-    <h2>Live Log Stream</h2>
+    <h2>Lumbrbuff Streams</h2>
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <label for="end-time">End-time:</label>
+        <input type="datetime-local" step="1" id="end-time" style="padding: 6px;">
+        <input type="text" id="payload-search-input"
+          placeholder="Search log by pattern..." style="padding: 8px; width: 250px;">
+        <button id="refresh-btn" style="padding: 8px; cursor: pointer;">Refresh Logs</button>
+      </div>
+      <div class="toolbar-right">
+        <label for="limit-select">Show:</label>
+        <select id="limit-select" style="padding: 6px;">
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+        </select>
+      </div>
+    </div>
     <table id="log-table">
         <tr><th>Time</th><th>Level</th><th>Source</th><th>Message</th></tr>
     </table>
 
     <script>
-        const table = document.getElementById('log-table');
+        const fpConfig = {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i:S", // 24-hour format with seconds
+            time_24hr: true,           // Forces 24-hour mode
+            enableSeconds: true,
+            defaultDate: new Date(),   // Sets default to "Now"
+        };
+        const endPicker = flatpickr("#end-time", fpConfig);
 
-        function addLogRow(data, prepend = false) {
-            const row = table.insertRow(1);
+        const table = document.getElementById('log-table');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const endTimeInput = document.getElementById('end-time');
+        const limitSelect = document.getElementById('limit-select');
+        const searchInput = document.getElementById('payload-search-input');
+
+        function addLogRow(data) {
+            const row = table.insertRow(-1);
             row.className = data.severity;
-            row.innerHTML = `<td>${data.timestamp}</td><td>${data.severity}</td>
+            const localTime = new Date(data.timestamp).toLocaleString(undefined, {
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false})
+            row.innerHTML = `<td>${localTime}</td><td>${data.severity}</td>
                              <td>${data.file}:${data.line}</td><td>${data.message}</td>`;
         }
 
-        const socket = io();
-        socket.on('log_history', (logs) => {
-            console.log("Loading historical logs:", logs.length);
+        function clearTable() {
+          while (table.rows.length > 1) {
+            table.deleteRow(1);
+          }
+        }
 
-            logs.forEach(log => {
-                addLogRow(log);
-            });
-        });
-        socket.on('new_log', (data) => {
-            addLogRow(data);
-        });
+        function addLogs() {
+
+          let query = [
+            "limit="+limitSelect.value
+          ];
+
+          const endtimeValue = endTimeInput.value;
+          if (endtimeValue) {
+            const endtime = new Date(endtimeValue)
+            query.push("after="+endtime.toISOString());
+          }
+
+          const searchValue = searchInput.value;
+          if (searchValue) {
+            query.push("search="+searchValue);
+          }
+
+          refreshBtn.disabled = true;
+          refreshBtn.innerText = "Getting Logs...";
+
+          clearTable();
+          fetch('/logs' + "?" + query.join("&"))
+            .then(response => response.json())
+            .then(logs => {
+              if (logs) {
+                logs.forEach(log => addLogRow(log))
+              }
+            })
+            .catch(err => console.error("Error fetching logs:", err))
+            .finally(() => {
+              refreshBtn.disabled = false;
+              refreshBtn.innerText = "Refresh Logs";
+            })
+        }
+
+        refreshBtn.addEventListener('click', addLogs);
+
+        addLogs()
     </script>
 </body>
 </html>
